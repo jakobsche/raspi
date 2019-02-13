@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<title>TGPIOPort</title>
+<link rel="stylesheet" href="../fpdoc.css" type="text/css">
+
+</head>
+<body>
+<table class="bar" width="100%" border="0" cellpadding="4" cellspacing="0">
+<tr>
+<td><b>[<a href="../gpio/index.html">Overview</a>][<a href="../gpio/index-3.html">Types</a>][<a href="../gpio/index-4.html">Classes</a>][<a href="../gpio/index-5.html">Procedures and functions</a>][<a href="../gpio/index-8.html">Index</a>]</b></td>
+<td align="right"><span class="bartitle">Reference for unit 'GPIO' (<a href="../index.html">#raspi</a>)</span></td>
+</tr>
+</table>
+<h1>TGPIOPort</h1>
+<p>[<a href="../gpio/tgpioport-1.html" onClick="window.open('../gpio/tgpioport-1.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">Properties</a> (<a href="../gpio/tgpioport-2.html" onClick="window.open('../gpio/tgpioport-2.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">by Name</a>)] [<a href="../gpio/tgpioport-3.html" onClick="window.open('../gpio/tgpioport-3.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">Methods</a> (<a href="../gpio/tgpioport-4.html" onClick="window.open('../gpio/tgpioport-4.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">by Name</a>)] [<a href="../gpio/tgpioport-5.html" onClick="window.open('../gpio/tgpioport-5.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">Events</a> (<a href="../gpio/tgpioport-6.html" onClick="window.open('../gpio/tgpioport-6.html', 'list', 'dependent=yes,resizable=yes,scrollbars=yes,height=400,width=300'); return false;">by Name</a>)] </p>
+<p>component class to access a binary port</p>
+<h2>Declaration</h2>
+<p>Source position: gpio.pas line 17</p>
+<table cellpadding="0" cellspacing="0">
+<tr>
+<td><p><tt><span class="code"><span class="kw">type</span> TGPIOPort <span class="sym">=</span> <span class="kw">class</span><span class="sym">(</span>TComponent<span class="sym">)</span> <span class="kw">end</span><span class="sym">;</span></span></tt></p></td>
+</tr>
+<tr>
+<td><p><tt><span class="code"><span class="kw">public</span></span></tt></p></td>
+</tr>
+<tr>
+<td valign="top"><p><tt><span class="code">&nbsp;&nbsp;<span class="kw">property </span><a href="../gpio/tgpioport.value.html">Value</a><span class="sym">: </span>Boolean<span class="sym">;</span>  [rw]</span></tt></p></td>
+<td><p>&nbsp;&nbsp;</p></td>
+<td><p class="cmt">value of the addressed binary port</p></td>
+</tr>
+<tr>
+<td><p><tt><span class="code"><span class="kw">published</span></span></tt></p></td>
+</tr>
+<tr>
+<td valign="top"><p><tt><span class="code">&nbsp;&nbsp;<span class="kw">property </span><a href="../gpio/tgpioport.activelow.html">ActiveLow</a><span class="sym">: </span>Boolean<span class="sym">;</span>  [rw]</span></tt></p></td>
+<td><p>&nbsp;&nbsp;</p></td>
+<td><p class="cmt">relationship between the boolean value of the property Value and the hardware port state</p></td>
+</tr>
+<tr>
+<td valign="top"><p><tt><span class="code">&nbsp;&nbsp;<span class="kw">property </span><a href="../gpio/tgpioport.address.html">Address</a><span class="sym">: </span><a href="../gpio/tgpioaddress.html">TGPIOAddress</a><span class="sym">;</span>  [rw]</span></tt></p></td>
+<td><p>&nbsp;&nbsp;</p></td>
+<td><p class="cmt">GPIO address of the port that is managed with the TGPIOPort component</p></td>
+</tr>
+<tr>
+<td valign="top"><p><tt><span class="code">&nbsp;&nbsp;<span class="kw">property </span><a href="../gpio/tgpioport.direction.html">Direction</a><span class="sym">: </span><a href="../gpio/tportdirection.html">TPortDirection</a><span class="sym">;</span>  [rw]</span></tt></p></td>
+<td><p>&nbsp;&nbsp;</p></td>
+<td><p class="cmt">declares the instance as an input or output</p></td>
+</tr>
+<tr>
+<td><p><tt><span class="code"></span></tt></p></td>
+</tr>
+</table>
+<h2>Inheritance</h2>
+<table cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" valign="top"><p><tt><span class="code"><a href="../gpio/tgpioport.html">TGPIOPort</a></span></tt></p></td>
+<td><p>&nbsp;&nbsp;</p></td>
+<td><p class="cmt">component class to access a binary port</p></td>
+</tr>
+<tr>
+<td align="center">|</td>
+</tr>
+<tr>
+<td align="center"><p><tt><span class="code">TComponent</span></tt></p></td>
+</tr>
+<tr>
+<td align="center">?</td>
+</tr>
+<tr>
+<td align="center"><p><tt><span class="code">TObject</span></tt></p></td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<docproject>
+  <options>
+    <option name="ostarget" value="Linux"/>
+    <option name="cputarget" value="x86_64"/>
+    <option name="format" value="HTML"/>
+    <option name="hide-protected" value="false"/>
+    <option name="warn-no-node" value="false"/>
+    <option name="show-private" value="false"/>
+    <option name="stop-on-parser-error" value="false"/>
+    <option name="parse-impl" value="false"/>
+    <option name="dont-trim" value="false"/>
+    <option name="emit-notes" value="false"/>
+  </options>
+  <packages>
+    <package name="raspi" output="html" content="">
+      <units>
+        <unit file="gpio.pas" options=""/>
+      </units>
+      <descriptions>
+        <description file="docs/gpio.xml"/>
+      </descriptions>
+      <imports/>
+    </package>
+  </packages>
+</docproject>

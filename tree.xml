@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TObject unit="System">
+  <TComponent>
+    <TGPIOPort unit="GPIO"/>
+  </TComponent>
+</TObject>

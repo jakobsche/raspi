@@ -1,0 +1,8 @@
+#!/bin/sh 
+
+# Packagedokumentation erstellen
+#===============================
+
+# Wenn die Dokumentationsprojektdatei vorhanden ist, wird mit diesem Skript die Dokumentation erzeugt.
+
+fpdoc --project=raspi-html.dp

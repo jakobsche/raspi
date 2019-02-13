@@ -1,0 +1,8 @@
+#!/bin/sh 
+
+# Projektdatei für fpdoc erstellen
+#=================================
+
+# Damit die Dokumentation immer vollständig ist, müssen die Quellcodedateien, die einbezogen werden sollen, als --input-Option angegeben werden. Dann muß dieses Skript ausgeführt werden, um eine Projektdatei für fpdoc zu erstellen
+
+fpdoc --input=gpio.pas --package=raspi --content --descr-dir=docs --format=html --verbose --write-project=raspi-html.dp --output=html

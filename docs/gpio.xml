@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="raspi">
+    <module name="GPIO">
+      <short>gives access to the GPIO interface</short>
+      <descr>read binary inputs or write binary outputs</descr>
+      <element name="TPortDirection">
+        <short>direction of a binary port with or without initialization</short>
+      </element>
+      <element name="TGPIOAddress">
+        <short>binary port address</short>
+        <descr>valid values are 0 to 32. 0 to 31 are valid binary port addresses. 32 means, that a TGPIOPort component has no related hardware port.</descr>
+      </element>
+      <element name="TGPIOPort">
+        <short>component class to access a binary port</short>
+      </element>
+      <element name="TGPIOPort.Value">
+        <short>value of the addressed binary port</short>
+        <descr>Writing the property sends the value to the hardware. Reading fetchts the value from the hardware.</descr>
+      </element>
+      <element name="TGPIOPort.ActiveLow">
+        <short>relationship between the boolean value of the property Value and the hardware port state</short>
+        <descr>if ActiveLow = False then Value = False means high voltage and Value = True means low voltage at the hardware port. ActiveLow = True exchanges the voltages at the ports related to the property Value.</descr>
+      </element>
+      <element name="TGPIOPort.Address">
+        <short>GPIO address of the port that is managed with the TGPIOPort component</short>
+      </element>
+      <element name="TGPIOPort.Direction">
+        <short>declares the instance as an input or output</short>
+      </element>
+      <element name="TPortDirection.pdInput">
+        <short>Reading the property Value reads the related boolean value of the hardware port state</short>
+      </element>
+      <element name="TPortDirection.pdOutput">
+        <short>writing the property Value modifies the hardware port to the related boolean value</short>
+      </element>
+      <element name="TPortDirection.pdOutputHigh">
+        <short>like pdOutput but initializing the port with the high voltage</short>
+      </element>
+      <element name="TPortDirection.pdOutputLow">
+        <short>like pdOutput but initializing the port with low voltage</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="raspi_1"/>
+    <AddToProjectUsesSection Value="True"/>
+    <Author Value="Andreas Jakobsche"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Wie raspi, jedoch zusätzlich abhängig von LCLBase, was in neueren Lazarus-Versionen nötig ist. In älteren Lazarus Versionen kann raspi stattdessen verwendet werden."/>
+    <Files Count="7">
+      <Item1>
+        <Filename Value="gpio.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="GPIO"/>
+      </Item1>
+      <Item2>
+        <Filename Value="chiptemp.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="ChipTemp"/>
+      </Item2>
+      <Item3>
+        <Filename Value="ledview.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="LEDView"/>
+      </Item3>
+      <Item4>
+        <Filename Value="sysfs.pas"/>
+        <UnitName Value="SysFS"/>
+      </Item4>
+      <Item5>
+        <Filename Value="retain.pas"/>
+        <UnitName Value="Retain"/>
+      </Item5>
+      <Item6>
+        <Filename Value="dcf77.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="DCF77"/>
+      </Item6>
+      <Item7>
+        <Filename Value="led7sd.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="LED7SD"/>
+      </Item7>
+    </Files>
+    <LazDoc Paths="docs"/>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="4">
+      <Item1>
+        <PackageName Value="streams"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="rtlpatch"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LCLBase"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item4>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <CustomOptions Items="ExternHelp" Version="2">
+      <_ExternHelp Items="Count"/>
+    </CustomOptions>
+  </Package>
+</CONFIG>
