@@ -20,7 +20,7 @@ unit GPIO;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, EvMsg;
 
 {$DEFINE BPLUS}
 
@@ -34,50 +34,102 @@ type
   TEdge = (eRising, eFalling);
   TEdges = set of TEdge;
 
-  { TGPIOPort }
+  { TCustomGPIOPort }
 
-  TGPIOPort = class(TComponent)
-  private
-    function GetPortEdgeFileName: string;
-    procedure GPIOEventRequest(var Msg); message 'GPIOEvent';
+  TCustomGPIOPort = class(TComponent)
   private
     FAddress: TGPIOAddress;
     FValue: Boolean;
-    FOnGPIOEvent: TNotifyEvent;
-    function GetActiveLow: Boolean;
-    function GetActiveLowFilename: string;
     function GetDirection: TPortDirection;
-    function GetEdges: TEdges;
-    procedure SetEdges(Value: TEdges);
+    procedure SetDirection(AValue: TPortDirection);
+    function GetEdges: TEdges; virtual;
+    procedure SetEdges(AValue: TEdges); virtual;
+    function GetActiveLow: Boolean;
+    procedure SetActiveLow(AValue: Boolean);
+    function GetActiveLowFilename: string;
     function GetPortDirName: string;
     function GetPortDirectionFileName: string;
+    function GetPortEdgeFileName: string;
     function GetPortValueFileName: string;
-    {function GetTerminal: Byte;}
     function GetValue: Boolean;
-    procedure ForcePortFS;
-    procedure SetActiveLow(Value: Boolean);
-    {procedure SetTerminal(Value: Byte);}
     procedure SetValue(Value: Boolean);
-    procedure SetDirection(Value: TPortDirection);
+    procedure ForcePortFS;
     property ActiveLowFilename: string read GetActiveLowFileName;
     property PortDirName: string read GetPortDirName;
     property PortDirectionFileName: string read GetPortDirectionFileName;
     property PortEdgeFileName: string read GetPortEdgeFileName;
     property PortValueFileName: string read GetPortValueFileName;
   protected
-    procedure DoGPIOEvent; virtual;
+    function EdgeFalling: Boolean;
+    function EdgeRising: Boolean;
+    property ActiveLow: Boolean read GetActiveLow write SetActiveLow;
+    property Direction: TPortDirection read GetDirection write SetDirection;
+    property Edges: TEdges read GetEdges write SetEdges;
+    property Value: Boolean read GetValue write SetValue;
+  published
+    property Address: TGPIOAddress read FAddress write FAddress;
+  end;
+
+  TBinaryIO = class(TCustomGPIOPort)
+  published
+    property ActiveLow;
+    property Value;
+  end;
+
+  { TBinaryInput }
+
+  TBinaryInput = class(TBinaryIO)
+  public
+    constructor Create(AnOwner: TComponent); override;
+  end;
+
+  { TBinaryOutput }
+
+  TBinaryOutput = class(TBinaryIO)
+  public
+    constructor Create(AnOwner: TComponent); override; overload;
+  end;
+
+  { TEdgeDrivenInput }
+
+  TEdgeDrivenInput = class(TBinaryInput, IMessageReceiver)
+  private
+    class var MessageGenerator: TMessageGenerator;
+  private
+    FEdges: TEdges;
+    FOnEdge, FOnFallingEdge, FOnRisingEdge: TNotifyEvent;
+    PrevValue: Boolean;
+    function GetEdges: TEdges; override;
+    procedure SetEdges(AValue: TEdges); override; {connects to MessageGenerator, if
+      Value <> [] oder disconnects, if AValue = []}
+  protected
+    procedure EdgeEvent; virtual;
+    procedure RisingEdgeEvent; virtual;
+    procedure FallingEdgeEvent; virtual;
+  public
+    destructor Destroy; override;
+    procedure GenerateEvents; virtual;
+  published
+    property Edges;
+    property OnEdge: TNotifyEvent read FOnEdge write FOnEdge;
+    property OnFallingEdge: TNotifyEvent read FOnFallingEdge write FOnFallingEdge;
+    property OnRisingEdge: TNotifyEvent read FOnRisingEdge write FOnRisingEdge;
+  end;
+
+  { TGPIOPort }
+
+  TGPIOPort = class(TCustomGPIOPort)
+  private
+    {function GetTerminal: Byte;}
+    {procedure SetTerminal(Value: Byte);}
+  protected
   public
     {property Terminal: Byte read GetTerminal write SetTerminal;}
     constructor Create(TheOwner: TComponent); override;
-    function EdgeFalling: Boolean;
-    function EdgeRising: Boolean;
-    property Value: Boolean read GetValue write SetValue;
+    property Value;
   published
-    property ActiveLow: Boolean read GetActiveLow write SetActiveLow;
-    property Address: TGPIOAddress read FAddress write FAddress;
-    property Direction: TPortDirection read GetDirection write SetDirection;
-    property Edges: TEdges read GetEdges write SetEdges;
-    property OnGPIOEvent: TNotifyEvent read FOnGPIOEvent write FOnGPIOEvent;
+    property ActiveLow;
+    property Direction;
   end;
 
 procedure Register;
@@ -116,18 +168,91 @@ const
      0,  0,  3,  5,  7,  0,  0, 26, 24, 21, 19, 23,  0,  0,  8, 10,     {Pin}
 {   16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32} {GPIO}
      0, 11, 12, 35, 38, 40, 15, 16, 18, 22, 37, 13,103,104,105,106,  0);{Pin}
+
+{ TBinaryOutput }
+
+constructor TBinaryOutput.Create(AnOwner: TComponent);
+begin
+  inherited Create(AnOwner);
+  Direction := pdOutput
+end;
+
 {$ENDIF}
+
+{ TEdgeDrivenInput }
+
+function TEdgeDrivenInput.GetEdges: TEdges;
+begin
+  Result := FEdges;
+end;
+
+procedure TEdgeDrivenInput.SetEdges(AValue: TEdges);
+begin
+  if AValue <> FEdges then begin
+    if FEdges = [] then begin
+      if not Assigned(MessageGenerator) then
+        MessageGenerator := TMessageGenerator.Create(False);
+      while not MessageGenerator.AddReceiver(Self) do;
+    end
+    else
+      if AValue = [] then begin
+        while not MessageGenerator.RemoveReceiver(Self) do;
+        if MessageGenerator.ReceiverCount = 0 then FreeAndNil(MessageGenerator)
+      end;
+    FEdges := AValue
+  end
+end;
+
+procedure TEdgeDrivenInput.EdgeEvent;
+begin
+  if Assigned(FOnEdge) then FOnEdge(Self)
+end;
+
+procedure TEdgeDrivenInput.RisingEdgeEvent;
+begin
+  if Assigned(FOnRisingEdge) then FOnRisingEdge(Self)
+end;
+
+procedure TEdgeDrivenInput.FallingEdgeEvent;
+begin
+  if Assigned(FOnFallingEdge) then FOnFallingEdge(Self)
+end;
+
+destructor TEdgeDrivenInput.Destroy;
+begin
+  while not MessageGenerator.RemoveReceiver(Self) do;
+  if MessageGenerator.ReceiverCount = 0 then MessageGenerator.Free;
+  inherited Destroy;
+end;
+
+procedure TEdgeDrivenInput.GenerateEvents;
+begin
+  if Value <> PrevValue then begin
+    if EdgeRising then RisingEdgeEvent
+    else if EdgeFalling then FallingEdgeEvent;
+    EdgeEvent
+  end;
+  PrevValue := FValue
+end;
+
+{ TBinaryInput }
+
+constructor TBinaryInput.Create(AnOwner: TComponent);
+begin
+  inherited Create(AnOwner);
+  Direction := pdInput;
+end;
 
 {var
   GPIOs: array[TJ8PinNumbers] of TGPIOAddress;}
 
-function TGPIOPort.GetPortEdgeFileName: string;
+function TCustomGPIOPort.GetPortEdgeFileName: string;
 begin
   ForcePortFS;
   Result := BuildFileName(PortDirName, 'edge')
 end;
 
-procedure TGPIOPort.GPIOEventRequest(var Msg);
+{procedure TGPIOPort.GPIOEventRequest(var Msg);
 type
   TGPIOMessage = record
     Msg: ShortString;
@@ -135,31 +260,31 @@ type
   end;
 begin
   if TGPIOMessage(Msg).Address = Address then DoGPIOEvent;
-end;
+end;}
 
-function TGPIOPort.GetActiveLow: Boolean;
+function TCustomGPIOPort.GetActiveLow: Boolean;
 begin
   ForcePortFS;
   if GetIntAttribute(ActiveLowFileName) = 0 then Result := False
   else Result := True
 end;
 
-function TGPIOPort.GetActiveLowFilename: string;
+function TCustomGPIOPort.GetActiveLowFilename: string;
 begin
   Result := BuildFileName(PortDirName, 'active_low');
 end;
 
-function TGPIOPort.GetPortDirName: string;
+function TCustomGPIOPort.GetPortDirName: string;
 begin
   Result := Format(PortDirNameTemplate, [FAddress])
 end;
 
-function TGPIOPort.GetPortDirectionFileName: string;
+function TCustomGPIOPort.GetPortDirectionFileName: string;
 begin
   Result := BuildFileName(PortDirName, 'direction')
 end;
 
-function TGPIOPort.GetPortValueFileName: string;
+function TCustomGPIOPort.GetPortValueFileName: string;
 begin
   Result := BuildFilename(PortDirname, 'value')
 end;
@@ -169,7 +294,7 @@ begin
   Result := GPIOPins[Address]
 end;}
 
-function TGPIOPort.GetValue: Boolean;
+function TCustomGPIOPort.GetValue: Boolean;
 begin
   ForcePortFS;
   case Direction of
@@ -178,7 +303,7 @@ begin
   Result := FValue;
 end;
 
-procedure TGPIOPort.ForcePortFS;
+procedure TCustomGPIOPort.ForcePortFS;
 var F: TextFile;
 begin
   if not FileExists(PortDirName) then begin
@@ -189,10 +314,10 @@ begin
   end;
 end;
 
-procedure TGPIOPort.SetActiveLow(Value: Boolean);
+procedure TCustomGPIOPort.SetActiveLow(AValue: Boolean);
 begin
   ForcePortFS;
-  SetAttribute(ActiveLowFileName, Value);
+  SetAttribute(ActiveLowFileName, AValue);
 end;
 
 {procedure TGPIOPort.SetTerminal(Value: Byte);
@@ -200,7 +325,7 @@ begin
   FAddress := GPIOs[Value]
 end;}
 
-procedure TGPIOPort.SetValue(Value: Boolean);
+procedure TCustomGPIOPort.SetValue(Value: Boolean);
 begin
   ForcePortFS;
   FValue := Value;
@@ -209,7 +334,7 @@ begin
   end;
 end;
 
-function TGPIOPort.GetDirection: TPortDirection;
+function TCustomGPIOPort.GetDirection: TPortDirection;
 var
   x: string;
 begin
@@ -219,7 +344,7 @@ begin
   if x <> 'in' then Result := pdOutput
 end;
 
-function TGPIOPort.GetEdges: TEdges;
+function TCustomGPIOPort.GetEdges: TEdges;
 var
   x: string;
 begin
@@ -230,31 +355,24 @@ begin
   else if x = 'both' then Result := [erising, eFalling]
 end;
 
-procedure TGPIOPort.SetEdges(Value: TEdges);
+procedure TCustomGPIOPort.SetEdges(AValue: TEdges);
 begin
   ForcePortFS;
-  if Value = [eRising] then SetAttribute(PortEdgeFileName, 'rising')
-  else if Value = [eFalling] then SetAttribute(PortEdgeFileName, 'falling')
-  else if Value = [eRising, eFalling] then SetAttribute(PortEdgeFileName, 'both')
+  if AValue = [eRising] then SetAttribute(PortEdgeFileName, 'rising')
+  else if AValue = [eFalling] then SetAttribute(PortEdgeFileName, 'falling')
+  else if AValue = [eRising, eFalling] then SetAttribute(PortEdgeFileName, 'both')
   else SetAttribute(PortEdgeFileName, 'none')
-  {Ein-/Ausschließen von Callbacks ist noch erforderlich
-  (udev-Regeln? uevent?)}
 end;
 
-procedure TGPIOPort.SetDirection(Value: TPortDirection);
+procedure TCustomGPIOPort.SetDirection(AValue: TPortDirection);
 begin
   ForcePortFS;
-  case Value of
+  case AValue of
     pdOutput: SetAttribute(PortDirectionFileName, 'out');
     pdOutputHigh: SetAttribute(PortDirectionFileName, 'high');
     pdOutputLow: SetAttribute(PortDirectionFileName, 'low');
     else SetAttribute(PortDirectionFileName,  'in');
   end;
-end;
-
-procedure TGPIOPort.DoGPIOEvent;
-begin
-  if Assigned(OnGPIOEvent) then OnGPIOEvent(Self)
 end;
 
 constructor TGPIOPort.Create(TheOwner: TComponent);
@@ -263,19 +381,19 @@ begin
   FAddress := NC;
 end;
 
-function TGPIOPort.EdgeFalling: Boolean;
+function TCustomGPIOPort.EdgeFalling: Boolean;
 begin
-  Result := Value = False
+  Result := FValue = False
 end;
 
-function TGPIOPort.EdgeRising: Boolean;
+function TCustomGPIOPort.EdgeRising: Boolean;
 begin
-  Result := Value = True
+  Result := FValue = True
 end;
 
 procedure Register;
 begin
-  RegisterComponents('Hardware', [TGPIOPort]);
+  RegisterComponents('Hardware', [TBinaryInput, TEdgeDrivenInput, TGPIOPort]);
 end;
 
 {var

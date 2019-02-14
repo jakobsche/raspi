@@ -51,23 +51,26 @@
       <EnableI18N Value="True"/>
       <OutDir Value="po"/>
     </i18n>
-    <RequiredPkgs Count="5">
+    <RequiredPkgs Count="6">
       <Item1>
-        <PackageName Value="computer"/>
+        <PackageName Value="threads"/>
       </Item1>
       <Item2>
-        <PackageName Value="streams"/>
+        <PackageName Value="computer"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="streams"/>
       </Item3>
       <Item4>
-        <PackageName Value="rtlpatch"/>
+        <PackageName Value="LCL"/>
       </Item4>
       <Item5>
+        <PackageName Value="rtlpatch"/>
+      </Item5>
+      <Item6>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item5>
+      </Item6>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
