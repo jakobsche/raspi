@@ -94,14 +94,16 @@ type
 
   TEdgeDrivenInput = class(TBinaryInput, IMessageReceiver)
   private
-    class var MessageGenerator: TMessageGenerator;
+    class var FMessageGenerator: TMessageGenerator;
   private
     FEdges: TEdges;
     FOnEdge, FOnFallingEdge, FOnRisingEdge: TNotifyEvent;
     PrevValue: Boolean;
     function GetEdges: TEdges; override;
-    procedure SetEdges(AValue: TEdges); override; {connects to MessageGenerator, if
+    function GetMessageGenerator: TMessageGenerator;
+    procedure SetEdges(AValue: TEdges); override; {connects to FMessageGenerator, if
       Value <> [] oder disconnects, if AValue = []}
+    procedure SetMessageGenerator(AValue: TMessageGenerator);
   protected
     procedure EdgeEvent; virtual;
     procedure RisingEdgeEvent; virtual;
@@ -109,8 +111,16 @@ type
   public
     destructor Destroy; override;
     procedure GenerateEvents; virtual;
+    property MessageGenerator: TMessageGenerator read GetMessageGenerator
+      write SetMessageGenerator; {Ignore this property, if this is the
+      only class you want to connect to a thread and all its instances use the
+      same thread instance. Assign this to the same property of another class,
+      after Edges is assigned to something <> [], if a further class is supposed
+      to use the same thread. Alternatively create a TMessageGenerator
+      instance and assign it to 1 instance of every classes (or the classes
+      themselves) that will have to use the same thread instance.}
   published
-    property Edges;
+    property Edges; {sets also MessageGenerator, if it is nil}
     property OnEdge: TNotifyEvent read FOnEdge write FOnEdge;
     property OnFallingEdge: TNotifyEvent read FOnFallingEdge write FOnFallingEdge;
     property OnRisingEdge: TNotifyEvent read FOnRisingEdge write FOnRisingEdge;
@@ -168,6 +178,7 @@ const
      0,  0,  3,  5,  7,  0,  0, 26, 24, 21, 19, 23,  0,  0,  8, 10,     {Pin}
 {   16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32} {GPIO}
      0, 11, 12, 35, 38, 40, 15, 16, 18, 22, 37, 13,103,104,105,106,  0);{Pin}
+{$ENDIF}
 
 { TBinaryOutput }
 
@@ -177,8 +188,6 @@ begin
   Direction := pdOutput
 end;
 
-{$ENDIF}
-
 { TEdgeDrivenInput }
 
 function TEdgeDrivenInput.GetEdges: TEdges;
@@ -186,21 +195,36 @@ begin
   Result := FEdges;
 end;
 
+function TEdgeDrivenInput.GetMessageGenerator: TMessageGenerator;
+begin
+  Result := FMessageGenerator
+end;
+
 procedure TEdgeDrivenInput.SetEdges(AValue: TEdges);
 begin
   if AValue <> FEdges then begin
     if FEdges = [] then begin
-      if not Assigned(MessageGenerator) then
-        MessageGenerator := TMessageGenerator.Create(False);
-      while not MessageGenerator.AddReceiver(Self) do;
+      if not Assigned(FMessageGenerator) then
+        FMessageGenerator := TMessageGenerator.Create(not (csDesigning in ComponentState));
+      while not FMessageGenerator.AddReceiver(Self) do;
     end
     else
       if AValue = [] then begin
-        while not MessageGenerator.RemoveReceiver(Self) do;
-        if MessageGenerator.ReceiverCount = 0 then FreeAndNil(MessageGenerator)
+        while not FMessageGenerator.RemoveReceiver(Self) do;
+        if FMessageGenerator.ReceiverCount = 0 then FreeAndNil(FMessageGenerator)
       end;
     FEdges := AValue
   end
+end;
+
+procedure TEdgeDrivenInput.SetMessageGenerator(AValue: TMessageGenerator);
+begin
+  if AValue <> FMessageGenerator then begin
+    if Assigned(FMessageGenerator) then while not FMessageGenerator.RemoveReceiver(Self) do;
+    if FMessageGenerator.ReceiverCount = 0 then FMessageGenerator.Free;
+    FMessageGenerator := AValue;
+    while FMessageGenerator.AddReceiver(Self) do
+  end;
 end;
 
 procedure TEdgeDrivenInput.EdgeEvent;
@@ -220,19 +244,22 @@ end;
 
 destructor TEdgeDrivenInput.Destroy;
 begin
-  while not MessageGenerator.RemoveReceiver(Self) do;
-  if MessageGenerator.ReceiverCount = 0 then MessageGenerator.Free;
+  while not FMessageGenerator.RemoveReceiver(Self) do;
+  if FMessageGenerator.ReceiverCount = 0 then FMessageGenerator.Free;
   inherited Destroy;
 end;
 
 procedure TEdgeDrivenInput.GenerateEvents;
 begin
-  if Value <> PrevValue then begin
-    if EdgeRising then RisingEdgeEvent
-    else if EdgeFalling then FallingEdgeEvent;
-    EdgeEvent
+  if Edges <> [] then begin
+    if Value <> PrevValue then begin
+      if (eRising in Edges) and EdgeRising then RisingEdgeEvent;
+      if (eFalling in Edges) and EdgeFalling then FallingEdgeEvent;
+      if (Edges = [eRising, eFalling]) and (EdgeRising or EdgeFalling) then
+        EdgeEvent
+    end;
+    PrevValue := FValue
   end;
-  PrevValue := FValue
 end;
 
 { TBinaryInput }
@@ -251,16 +278,6 @@ begin
   ForcePortFS;
   Result := BuildFileName(PortDirName, 'edge')
 end;
-
-{procedure TGPIOPort.GPIOEventRequest(var Msg);
-type
-  TGPIOMessage = record
-    Msg: ShortString;
-    Address: Integer;
-  end;
-begin
-  if TGPIOMessage(Msg).Address = Address then DoGPIOEvent;
-end;}
 
 function TCustomGPIOPort.GetActiveLow: Boolean;
 begin
@@ -393,7 +410,8 @@ end;
 
 procedure Register;
 begin
-  RegisterComponents('Hardware', [TBinaryInput, TEdgeDrivenInput, TGPIOPort]);
+  RegisterComponents('Hardware', [TBinaryInput, TEdgeDrivenInput, TBinaryOutput,
+  TGPIOPort]);
 end;
 
 {var
