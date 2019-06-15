@@ -7,14 +7,13 @@ unit raspi;
 interface
 
 uses
-  GPIO, LED7SD, LazarusPackageIntf;
+  GPIO, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
   RegisterUnit('GPIO', @GPIO.Register);
-  RegisterUnit('LED7SD', @LED7SD.Register);
 end;
 
 initialization
