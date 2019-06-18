@@ -14,6 +14,6 @@ To use it in the form designer, you must install it in Lazarus. This requires to
 
 If you got one application running this way, most other applications being created the same way, will run without to repeat this expense.
 
-By the way: The package is hardware independent. So you should also be able to compile it and your applications for all computers with Linux and the necessary peripheral devices, if you can get a Free Pascal Compiler for your target system.
+By the way: The package is CPU independent by using sysfs. So you should also be able to compile it and your applications for all computers with Linux and the necessary peripheral devices, if you can get a Free Pascal Compiler for your target system.
 
 Good luck!
