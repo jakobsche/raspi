@@ -4,7 +4,7 @@ This package was made for and particularly tested on Raspberry Pi. The easiest w
 
 ## Install compiler and tools
 
-Because such packages of your Linux distribution are often older than what I use, something might be incompatible. To get the most recent versions of the tools, learn to install them from the sources. I was successfully with downloading the binaries of FPC and the sources from the original websites (freepascal.org, lazarus-ide.org) and following the instructions in the contained documents.
+Because such Raspbian packages are often older than what I use, something might be incompatible. To get the most recent versions of the tools, learn to install them from the sources. I was successfully with downloading the binaries of FPC and the sources from the original websites (freepascal.org, lazarus-ide.org) and following the instructions in the contained documents.
 
 ## Use  raspi
 
