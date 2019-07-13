@@ -69,7 +69,6 @@ type
     property Edges: TEdges read GetEdges write SetEdges; {sets also MessageGenerator, if it is nil}
     property Value: Boolean read GetValue write SetValue;
   public
-    constructor Create(AnOwner: TComponent); override;
   published
     property Address: TGPIOAddress read FAddress write FAddress;
   end;
@@ -364,11 +363,6 @@ end;
 procedure TCustomGPIOPort.DoGPIOEvent;
 begin
 
-end;
-
-constructor TCustomGPIOPort.Create(AnOwner: TComponent);
-begin
-  inherited Create(AnOwner);
 end;
 
 procedure TCustomGPIOPort.SetActiveLow(AValue: Boolean);
